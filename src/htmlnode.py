@@ -17,7 +17,6 @@ class HTMLNode():
 
         for key, value in self.props.items():
             html += key + '="' + value + '" '
-            print(html)
         
         return html[0:-1]
     
