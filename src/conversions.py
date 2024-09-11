@@ -130,3 +130,52 @@ def text_to_textnodes(text):
     image = split_nodes_image(link)
 
     return image
+
+def markdown_to_blocks(markdown):
+    blocks = markdown.split("\n\n")
+    final_blocks = []
+
+    for block in blocks:
+        if block != "":
+            final_blocks.append(block.strip(" \n"))
+    
+    return final_blocks
+
+def block_to_block_type(text):
+    prefix = text.split(" ")
+
+    if text[0] == "#" or text[0:2] == "##" or text[0:3] == "###" or text[0:4] == "####" or text[0:5] == "#####" or text[0:6] == "######":
+        return "heading"
+    if text[0:3] == "```" and text[-3:] == "```":
+        return "code"
+    
+    ul = True
+    ol = True
+    quote = True
+    count = 1
+
+    lines = text.split("\n")
+
+    for line in lines:
+        if line[0] != ">":
+            quote = False
+        if line[0:2] != "* " and line[0:2] != "- ":
+            ul = False
+        if ol == True:
+            num = line.split(". ", 1)
+            if num[0].isnumeric(): 
+                if int(num[0]) != count:
+                    ol = False
+            else:
+                ol = False
+
+        count += 1
+        
+    if quote == True:
+        return "quote"
+    if ul == True:
+        return "unordered_list"
+    if ol == True:
+        return "ordered_list"
+    
+    return "paragraph"

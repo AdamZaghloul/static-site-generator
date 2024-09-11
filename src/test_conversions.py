@@ -179,5 +179,93 @@ class TestConversions(unittest.TestCase):
         ]
         self.assertEqual(nodes, nodes2)
     
+    def test_markdown_to_blocks(self):
+        text = "# This is a heading\n\nThis is a paragraph of text. It has some **bold** and *italic* words inside of it.\n\n* This is the first list item in a list block\n* This is a list item\n* This is another list item"
+
+        output = markdown_to_blocks(text)
+        expected = ["# This is a heading", "This is a paragraph of text. It has some **bold** and *italic* words inside of it.", "* This is the first list item in a list block\n* This is a list item\n* This is another list item"]
+        self.assertEqual(output, expected)
+    
+    def test_block_to_block_type_paragrah(self):
+        text = "This is a paragraph. Nice and simple."
+
+        self.assertEqual(block_to_block_type(text), "paragraph")
+    def test_block_to_block_type_heading1(self):
+        text = "#This is a heading"
+
+        self.assertEqual(block_to_block_type(text), "heading")
+    def test_block_to_block_type_heading2(self):
+        text = "##This is a heading"
+
+        self.assertEqual(block_to_block_type(text), "heading")
+    def test_block_to_block_type_heading3(self):
+        text = "###This is a heading"
+
+        self.assertEqual(block_to_block_type(text), "heading")
+    def test_block_to_block_type_heading4(self):
+        text = "####This is a heading"
+
+        self.assertEqual(block_to_block_type(text), "heading")
+    def test_block_to_block_type_heading5(self):
+        text = "#####This is a heading"
+
+        self.assertEqual(block_to_block_type(text), "heading")
+    def test_block_to_block_type_heading6(self):
+        text = "######This is a heading"
+
+        self.assertEqual(block_to_block_type(text), "heading")
+    def test_block_to_block_type_code(self):
+        text = "```This is a one-line code block```"
+
+        self.assertEqual(block_to_block_type(text), "code")
+    def test_block_to_block_type_code2(self):
+        text = "```This is a\ntwo-line code block```"
+
+        self.assertEqual(block_to_block_type(text), "code")
+    def test_block_to_block_type_quote(self):
+        text = ">This is a one-line quote"
+
+        self.assertEqual(block_to_block_type(text), "quote")
+    def test_block_to_block_type_quote2(self):
+        text = ">This is a \n>two-line quote"
+
+        self.assertEqual(block_to_block_type(text), "quote")
+    def test_block_to_block_type_ul(self):
+        text = "- This is a one-line ul"
+
+        self.assertEqual(block_to_block_type(text), "unordered_list")
+    def test_block_to_block_type_ul2(self):
+        text = "- This is a\n- two-line ul"
+
+        self.assertEqual(block_to_block_type(text), "unordered_list")
+    def test_block_to_block_type_ul3(self):
+        text = "- This is a\n* two-line mixed ul"
+
+        self.assertEqual(block_to_block_type(text), "unordered_list")
+    def test_block_to_block_type_ol(self):
+        text = "1. This is a one-line ol"
+
+        self.assertEqual(block_to_block_type(text), "ordered_list")
+    def test_block_to_block_type_ol2(self):
+        text = "1. This\n2. is\n3. a\n4. multi-line\n5. ol"
+
+        self.assertEqual(block_to_block_type(text), "ordered_list")
+    def test_block_to_block_type_code_error(self):
+        text = "```This is a one-line code block``"
+
+        self.assertEqual(block_to_block_type(text), "paragraph")
+    def test_block_to_block_type_quote_error(self):
+        text = ">This is a \ntwo-line quote"
+
+        self.assertEqual(block_to_block_type(text), "paragraph")
+    def test_block_to_block_type_ul_error(self):
+        text = "- This is a\ntwo-line ul"
+
+        self.assertEqual(block_to_block_type(text), "paragraph")
+    def test_block_to_block_type_ol_error(self):
+        text = "1. This\n2. is\n4. a\n4. multi-line\n5. ol"
+
+        self.assertEqual(block_to_block_type(text), "paragraph")
+
 if __name__ == "__main__":
     unittest.main()
