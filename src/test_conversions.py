@@ -88,7 +88,96 @@ class TestConversions(unittest.TestCase):
 
         node2 = [("to boot dev", "https://www.boot.dev"), ("to youtube", "https://www.youtube.com/@bootdotdev")]
         self.assertEqual(node, node2)
+    
+    def test_split_nodes_image(self):
+        node = TextNode("This is text with an image called ![to boot dev](https://www.boot.dev) and ![to youtube](https://www.youtube.com/@bootdotdev)", "text")
+        
+        nodes = split_nodes_image([node])
+        nodes2 = [
+            TextNode("This is text with an image called ", "text"),
+            TextNode("to boot dev", "image", "https://www.boot.dev"),
+            TextNode(" and ", "text"),
+            TextNode("to youtube", "image", "https://www.youtube.com/@bootdotdev"
+            ),
+        ]
+        self.assertEqual(nodes, nodes2)
+    def test_split_nodes_image2(self):
+        node = TextNode("![to boot dev](https://www.boot.dev)This is text with an image called and ![to youtube](https://www.youtube.com/@bootdotdev)", "text")
+        
+        nodes = split_nodes_image([node])
+        nodes2 = [
+            TextNode("to boot dev", "image", "https://www.boot.dev"),
+            TextNode("This is text with an image called and ", "text"),
+            TextNode("to youtube", "image", "https://www.youtube.com/@bootdotdev"
+            ),
+        ]
+        self.assertEqual(nodes, nodes2)
+    def test_split_nodes_image3(self):
+        node = TextNode("This is text with an image called ![to boot dev](https://www.boot.dev) and ![to youtube](https://www.youtube.com/@bootdotdev) with text at the end.", "text")
+        
+        nodes = split_nodes_image([node])
+        nodes2 = [
+            TextNode("This is text with an image called ", "text"),
+            TextNode("to boot dev", "image", "https://www.boot.dev"),
+            TextNode(" and ", "text"),
+            TextNode("to youtube", "image", "https://www.youtube.com/@bootdotdev"),
+            TextNode(" with text at the end.", "text")
+        ]
+        self.assertEqual(nodes, nodes2)
 
+    def test_split_nodes_link(self):
+        node = TextNode("This is text with an image called [to boot dev](https://www.boot.dev) and [to youtube](https://www.youtube.com/@bootdotdev)", "text")
+        
+        nodes = split_nodes_link([node])
+        nodes2 = [
+            TextNode("This is text with an image called ", "text"),
+            TextNode("to boot dev", "link", "https://www.boot.dev"),
+            TextNode(" and ", "text"),
+            TextNode("to youtube", "link", "https://www.youtube.com/@bootdotdev"
+            ),
+        ]
+        self.assertEqual(nodes, nodes2)
+    def test_split_nodes_link2(self):
+        node = TextNode("[to boot dev](https://www.boot.dev)This is text with an image called and [to youtube](https://www.youtube.com/@bootdotdev)", "text")
+        
+        nodes = split_nodes_link([node])
+        nodes2 = [
+            TextNode("to boot dev", "link", "https://www.boot.dev"),
+            TextNode("This is text with an image called and ", "text"),
+            TextNode("to youtube", "link", "https://www.youtube.com/@bootdotdev"
+            ),
+        ]
+        self.assertEqual(nodes, nodes2)
+    def test_split_nodes_link3(self):
+        node = TextNode("This is text with an image called [to boot dev](https://www.boot.dev) and [to youtube](https://www.youtube.com/@bootdotdev) with text at the end.", "text")
+        
+        nodes = split_nodes_link([node])
+        nodes2 = [
+            TextNode("This is text with an image called ", "text"),
+            TextNode("to boot dev", "link", "https://www.boot.dev"),
+            TextNode(" and ", "text"),
+            TextNode("to youtube", "link", "https://www.youtube.com/@bootdotdev"),
+            TextNode(" with text at the end.", "text")
+        ]
+        self.assertEqual(nodes, nodes2)
+    
+    def test_text_to_textnodes(self):
+        text = "This is **text** with an *italic* word and a `code block` and an ![obi wan image](https://i.imgur.com/fJRm4Vk.jpeg) and a [link](https://boot.dev)"
 
+        nodes = text_to_textnodes(text)
+        nodes2 = [
+            TextNode("This is ", "text"),
+            TextNode("text", "bold"),
+            TextNode(" with an ", "text"),
+            TextNode("italic", "italic"),
+            TextNode(" word and a ", "text"),
+            TextNode("code block", "code"),
+            TextNode(" and an ", "text"),
+            TextNode("obi wan image", "image", "https://i.imgur.com/fJRm4Vk.jpeg"),
+            TextNode(" and a ", "text"),
+            TextNode("link", "link", "https://boot.dev"),
+        ]
+        self.assertEqual(nodes, nodes2)
+    
 if __name__ == "__main__":
     unittest.main()

@@ -34,7 +34,7 @@ def split_nodes_delimiter(old_nodes, delimiter, text_type):
     new_nodes = []
     
     for old_node in old_nodes:
-        if old_node.text_type != "text":
+        if old_node.text_type != "text" or delimiter not in old_node.text:
             new_nodes.append(old_node)
         else:
             del_count = 0
@@ -66,10 +66,67 @@ def split_nodes_delimiter(old_nodes, delimiter, text_type):
     return new_nodes
 
 def split_nodes_image(old_nodes):
+    output = []
+    for old_node in old_nodes:
+        if old_node.text_type != "text":
+            output.append(old_node)
+        else:
+            images = extract_markdown_images(old_node.text)
+            working_string = old_node.text
+            for image in images:
+                split = working_string.split(f"![{image[0]}]({image[1]})", 1)
+                before = split[0]
+                if len(split) > 1:
+                    working_string = split[1]
+                else:
+                    working_string = ''
+
+                if before != '':
+                    output.append(TextNode(before, "text"))
+                output.append(TextNode(image[0], "image", image[1]))
+            
+            if working_string != '':
+                output.append(TextNode(working_string, "text"))
+    
+    return output
+
 def split_nodes_link(old_nodes):
+    output = []
+    for old_node in old_nodes:
+        if old_node.text_type != "text":
+            output.append(old_node)
+        else:
+            links = extract_markdown_links(old_node.text)
+            working_string = old_node.text
+            for link in links:
+                split = working_string.split(f"[{link[0]}]({link[1]})", 1)
+                before = split[0]
+                if len(split) > 1:
+                    working_string = split[1]
+                else:
+                    working_string = ''
+
+                if before != '':
+                    output.append(TextNode(before, "text"))
+                output.append(TextNode(link[0], "link", link[1]))
+            
+            if working_string != '':
+                output.append(TextNode(working_string, "text"))
+    
+    return output
 
 def extract_markdown_images(text):
     return re.findall(r"!\[(.*?)\]\((.*?)\)", text)
 
 def extract_markdown_links(text):
     return re.findall(r"(?<!!)\[(.*?)\]\((.*?)\)", text)
+
+def text_to_textnodes(text):
+
+    bold = split_nodes_delimiter([TextNode(text, "text")], "**", "bold")
+    italic = split_nodes_delimiter(bold, "*", "italic")
+    code = split_nodes_delimiter(italic, "`", "code")
+    link = split_nodes_link(code)
+    image = split_nodes_image(link)
+
+    return image
