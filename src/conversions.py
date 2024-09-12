@@ -3,6 +3,7 @@ import re
 from htmlnode import *
 from leafnode import *
 from textnode import *
+from parentnode import *
 
 def text_node_to_html_node(text_node):
 
@@ -179,3 +180,103 @@ def block_to_block_type(text):
         return "ordered_list"
     
     return "paragraph"
+
+def markdown_to_html_node(markdown):
+    str_blocks = markdown_to_blocks(markdown)
+    html_nodes = []
+
+    for block in str_blocks:
+        block_type = block_to_block_type(block)
+
+        match block_type:
+            case "heading":
+                html_nodes.append(markdown_to_html_node_heading(block))
+            case "code":
+                html_nodes.append(markdown_to_html_node_code(block))
+            case "quote":
+                html_nodes.append(markdown_to_html_node_quote(block))
+            case "unordered_list":
+                html_nodes.append(markdown_to_html_node_list("u", block))
+            case "ordered_list":
+                html_nodes.append(markdown_to_html_node_list("o", block))
+            case "paragraph":
+                html_nodes.append(markdown_to_html_node_paragraph(block))
+            case _:
+                raise Exception("Invalid Block Type")
+    
+    return ParentNode("div", html_nodes, None)
+    
+def markdown_to_html_node_heading(markdown):
+    count = 0
+
+    for char in markdown:
+        if char == "#":
+            count += 1
+        else:
+            break
+    
+    text = markdown[count:]
+
+    children = text_to_children(text)
+
+    return ParentNode(f"h{count}", children, None)
+
+def markdown_to_html_node_code(markdown):
+    text = markdown[3:-3]
+
+    children = text_to_children(text)
+
+    code_node = ParentNode("code", children, None)
+    pre_node = ParentNode("pre", code_node, None)
+
+    return pre_node
+
+def markdown_to_html_node_quote(markdown):
+    lines = markdown.split("\n")
+    new_lines = []
+
+    for line in lines:
+        line = line[1:]
+        new_lines.append(line)
+    
+    children = text_to_children("\n".join(new_lines))
+    
+    return ParentNode("blockquote", children, None)
+
+def markdown_to_html_node_list(list_type, markdown):
+
+    lines = markdown.split("\n")
+    items = []
+    count = 1
+
+    if list_type == "o":
+        tag = "ol"
+    elif list_type == "u":
+        tag = "ul"
+    else:
+        raise Exception("Invalid List Type")
+
+    for line in lines:
+        if list_type == "o":
+            line = line.split(f"{count}. ")[1]
+            count += 1
+        elif list_type == "u":
+            line = line[2:] 
+        
+        items.append(ParentNode("li", text_to_children(line), None))
+    
+    return ParentNode(tag, items, None)
+
+def markdown_to_html_node_paragraph(markdown):
+    
+    return ParentNode("p", text_to_children(markdown), None)
+
+def text_to_children(text):
+    children = []
+
+    text_nodes = text_to_textnodes(text)
+
+    for node in text_nodes:
+        children.append(text_node_to_html_node(node))
+    
+    return children

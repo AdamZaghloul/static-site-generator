@@ -4,6 +4,7 @@ from conversions import *
 from textnode import *
 from htmlnode import *
 from leafnode import *
+from parentnode import *
 
 
 class TestConversions(unittest.TestCase):
@@ -266,6 +267,60 @@ class TestConversions(unittest.TestCase):
         text = "1. This\n2. is\n4. a\n4. multi-line\n5. ol"
 
         self.assertEqual(block_to_block_type(text), "paragraph")
+
+    def test_markdown_to_html_node_heading(self):
+        text = "###This is a heading3"
+
+        node = markdown_to_html_node(text)
+        node2 = ParentNode("div", [ParentNode("h3", [LeafNode(None, text[3:], None)], None)], None)
+
+        self.assertEqual(node, node2)
+    def test_markdown_to_html_node_heading2(self):
+        text = "###This is a heading3 with a **bold** word"
+
+        node = markdown_to_html_node(text)
+        node2 = ParentNode("div", [ParentNode("h3", [LeafNode(None, "This is a heading3 with a ", None), LeafNode("b", "bold", None), LeafNode(None, " word", None)], None)], None)
+
+        self.assertEqual(node, node2)
+    def test_markdown_to_html_node_code(self):
+        text = "```This is a code block with a **bold** word```"
+
+        node = markdown_to_html_node(text)
+        node2 = ParentNode("div", [ParentNode("pre", ParentNode("code", [LeafNode(None, "This is a code block with a ", None), LeafNode("b", "bold", None), LeafNode(None, " word", None)], None), None)], None)
+        self.assertEqual(node, node2)
+
+    def test_markdown_to_html_node_quote(self):
+        text = ">This is a single line quote with a **bold** word"
+
+        node = markdown_to_html_node(text)
+        node2 = ParentNode("div", [ParentNode("blockquote", [LeafNode(None, "This is a single line quote with a ", None), LeafNode("b", "bold", None), LeafNode(None, " word", None)], None)], None)
+        self.assertEqual(node, node2)
+    def test_markdown_to_html_node_quote2(self):
+        text = ">This is a multi\n>line quote with a **bold** word"
+
+        node = markdown_to_html_node(text)
+        node2 = ParentNode("div", [ParentNode("blockquote", [LeafNode(None, "This is a multi\nline quote with a ", None), LeafNode("b", "bold", None), LeafNode(None, " word", None)], None)], None)
+        self.assertEqual(node, node2)
+    def test_markdown_to_html_node_list_ol(self):
+        text = "1. This\n2. is\n3. an\n4. ordered\n5. list with a **bold** word"
+
+        node = markdown_to_html_node(text)
+        node2 = ParentNode("div", [ParentNode("ol", [ParentNode("li", [LeafNode(None, "This", None)], None), ParentNode("li", [LeafNode(None, "is", None)], None), ParentNode("li", [LeafNode(None, "an", None)], None), ParentNode("li", [LeafNode(None, "ordered", None)], None), ParentNode("li", [LeafNode(None, "list with a ", None), LeafNode("b", "bold", None), LeafNode(None, " word", None)], None)], None)], None)
+        self.assertEqual(node, node2)
+
+    def test_markdown_to_html_node_list_ul(self):
+        text = "- This\n* is\n- an\n* unordered\n- list with a **bold** word"
+
+        node = markdown_to_html_node(text)
+        node2 = ParentNode("div", [ParentNode("ul", [ParentNode("li", [LeafNode(None, "This", None)], None), ParentNode("li", [LeafNode(None, "is", None)], None), ParentNode("li", [LeafNode(None, "an", None)], None), ParentNode("li", [LeafNode(None, "unordered", None)], None), ParentNode("li", [LeafNode(None, "list with a ", None), LeafNode("b", "bold", None), LeafNode(None, " word", None)], None)], None)], None)
+        self.assertEqual(node, node2)
+
+    def test_markdown_to_html_node_paragraph(self):
+        text = "This is a paragraph with a **bold** and *italic* word."
+
+        node = markdown_to_html_node(text)
+        node2 = ParentNode("div", [ParentNode("p", [LeafNode(None, "This is a paragraph with a ", None), LeafNode("b", "bold", None), LeafNode(None, " and ", None), LeafNode("i", "italic", None), LeafNode(None, " word.", None)], None)], None)   
+        self.assertEqual(node, node2)
 
 if __name__ == "__main__":
     unittest.main()
