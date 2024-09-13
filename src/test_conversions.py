@@ -286,7 +286,7 @@ class TestConversions(unittest.TestCase):
         text = "```This is a code block with a **bold** word```"
 
         node = markdown_to_html_node(text)
-        node2 = ParentNode("div", [ParentNode("pre", ParentNode("code", [LeafNode(None, "This is a code block with a ", None), LeafNode("b", "bold", None), LeafNode(None, " word", None)], None), None)], None)
+        node2 = ParentNode("div", [ParentNode("pre", [ParentNode("code", [LeafNode(None, "This is a code block with a ", None), LeafNode("b", "bold", None), LeafNode(None, " word", None)], None)], None)], None)
         self.assertEqual(node, node2)
 
     def test_markdown_to_html_node_quote(self):
@@ -321,6 +321,20 @@ class TestConversions(unittest.TestCase):
         node = markdown_to_html_node(text)
         node2 = ParentNode("div", [ParentNode("p", [LeafNode(None, "This is a paragraph with a ", None), LeafNode("b", "bold", None), LeafNode(None, " and ", None), LeafNode("i", "italic", None), LeafNode(None, " word.", None)], None)], None)   
         self.assertEqual(node, node2)
+    
+    def test_extract_title(self):
+        text = "# Hello "
+
+        title = "Hello"
+
+        self.assertEqual(extract_title(text), title)
+    
+    def test_extract_title2(self):
+        text = "## Hi\n#Hello\nthis is a line"
+
+        title = "Hello"
+
+        self.assertEqual(extract_title(text), title)
 
 if __name__ == "__main__":
     unittest.main()

@@ -19,7 +19,7 @@ def text_node_to_html_node(text_node):
         case "link":
             return LeafNode("a", text_node.text, {"href":text_node.url})
         case "image":
-            return LeafNode("img", None, {"src":text_node.url,"alt":text_node.text})
+            return LeafNode("img", "", {"src":text_node.url,"alt":text_node.text})
         case _:
             return Exception("Invalid Text Node Type for Conversion")
 
@@ -215,19 +215,19 @@ def markdown_to_html_node_heading(markdown):
         else:
             break
     
-    text = markdown[count:]
+    text = markdown[count:].strip()
 
     children = text_to_children(text)
 
     return ParentNode(f"h{count}", children, None)
 
 def markdown_to_html_node_code(markdown):
-    text = markdown[3:-3]
+    text = markdown[3:-3].strip()
 
     children = text_to_children(text)
 
     code_node = ParentNode("code", children, None)
-    pre_node = ParentNode("pre", code_node, None)
+    pre_node = ParentNode("pre", [code_node], None)
 
     return pre_node
 
@@ -239,7 +239,7 @@ def markdown_to_html_node_quote(markdown):
         line = line[1:]
         new_lines.append(line)
     
-    children = text_to_children("\n".join(new_lines))
+    children = text_to_children("\n".join(new_lines).strip())
     
     return ParentNode("blockquote", children, None)
 
@@ -280,3 +280,12 @@ def text_to_children(text):
         children.append(text_node_to_html_node(node))
     
     return children
+
+def extract_title(markdown):
+    lines = markdown.split("\n")
+
+    for line in lines:
+        if line[0] == "#" and line[1] != "#":
+            return line[1:].strip()
+    
+    raise Exception("No h1 header in markdown")
